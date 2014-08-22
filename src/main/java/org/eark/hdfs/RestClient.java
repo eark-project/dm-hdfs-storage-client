@@ -24,61 +24,47 @@ public class RestClient {
 
 public static final String BASE_URI = "http://localhost:8080/myapp/";
 	
-	private Client client;
-	private WebTarget target;
+    private Client client;
+    private WebTarget target;
   
-  public RestClient() {
-  	super();
-  }
+    public RestClient() {
+	super();
+    }
   
-  public void init() {
-  	//--System.setProperty("jersey.config.client.httpUrlConnector.useFixedLengthStreaming", "true");
-  	//--System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
+    public void init() {
   	ClientConfig clientConfig = new ClientConfig();
-  	//--clientConfig.connectorProvider((new HttpUrlConnectorProvider()).useSetMethodWorkaround());
+  	//clientConfig.connectorProvider((new HttpUrlConnectorProvider()));
   	//clientConfig.connectorProvider(new GrizzlyConnectorProvider());
-  	//--clientConfig.getProperties().put("jersey.config.client.httpUrlConnector.useFixedLengthStreaming", "true");
   	client = ClientBuilder.newClient(clientConfig);
   	client.property(ClientProperties.REQUEST_ENTITY_PROCESSING, "CHUNKED");
   	//--client.property(ClientProperties.CHUNKED_ENCODING_SIZE, 10240);
   	target = client.target(BASE_URI);
-  }
+    }
   
-  public String sendReq(String resourcePath) {
+    public String sendReq(String resourcePath) {
   	return target.path(resourcePath).request().get(String.class);
-  }
+    }
   
-  public String putFileReq(String resourcePath, File inFile) throws FileNotFoundException {
-  	InputStream fileInStream = new FileInputStream(inFile);
-    String contentDisposition = "attachment; filename=\"" + inFile.getName()+"\"";
-    target = target.path(resourcePath).path("upload").path(inFile.getName());    		    		
-    Invocation.Builder invocationBuilder = target.request(MediaType.APPLICATION_OCTET_STREAM_TYPE);
-    invocationBuilder.header("Content-Disposition", contentDisposition);
-    invocationBuilder.header("Content-Length", (int)inFile.length());
-    Response response = invocationBuilder.post(Entity.entity(fileInStream, MediaType.APPLICATION_OCTET_STREAM_TYPE));
-    //--Response response = target.path(resourcePath).request(MediaType.APPLICATION_OCTET_STREAM_TYPE).post(Entity.entity(fileInStream, MediaType.APPLICATION_OCTET_STREAM_TYPE));
-    //Response response = target.path(resourcePath).request().post(Entity.entity("test", MediaType.TEXT_PLAIN));
-    System.out.println("Response status: "+response.getStatus());
-    System.out.println("Response: "+response.getLocation());
-    //return response.readEntity(String.class);
-    return response.toString();
-  }
-
-  /*
-  InputStream fileInStream = new FileInputStream(fileName);
-  String sContentDisposition = "attachment; filename=\"" + fileName.getName()+"\"";
-  WebResource fileResource = a_client.resource(a_sUrl);       
-  ClientResponse response = fileResource.type(MediaType.APPLICATION_OCTET_STREAM)
-                          .header("Content-Disposition", sContentDisposition)
-                          .post(ClientResponse.class, fileInStream);  
-  */
+    public String putFileReq(String resourcePath, File inFile) throws FileNotFoundException {
+	InputStream fileInStream = new FileInputStream(inFile);
+        String contentDisposition = "attachment; filename=\"" + inFile.getName()+"\"";
+        target = target.path(resourcePath).path("upload").path(inFile.getName());    		    		
+        Invocation.Builder invocationBuilder = target.request(MediaType.APPLICATION_OCTET_STREAM_TYPE);
+        invocationBuilder.header("Content-Disposition", contentDisposition);
+        invocationBuilder.header("Content-Length", (int)inFile.length());
+        Response response = invocationBuilder.put(Entity.entity(fileInStream, MediaType.APPLICATION_OCTET_STREAM_TYPE));
+        System.out.println("Response status: "+response.getStatus());
+        System.out.println("Response: "+response.getLocation());
+        //return response.readEntity(String.class);
+        return response.toString();
+    }
   
-  /**
-   * Main method.
-   * @param args
-   * @throws IOException
-   */
-  public static void main(String[] args) throws IOException {
+    /**
+     * Main method.
+     * @param args
+     * @throws IOException
+     */
+    public static void main(String[] args) throws IOException {
 
   	if(args == null || args.length != 1 || !(new File(args[0])).exists()) 
   		usage();
@@ -98,12 +84,12 @@ public static final String BASE_URI = "http://localhost:8080/myapp/";
     
   	//String responseMsg = restClient.sendReq(resourcePath);
   	System.out.println("Request to /"+resourcePath+" returned: "+responseMsg);
-  }
+    }
   
-  public static void usage() {
+    public static void usage() {
   	System.out.println("client application to upload large files to the eArk HDFS storage service");
   	System.out.println("usage: java -jar JARFILE path_to_file");
   	System.exit(-1);
-  }
+    }
 
 }
