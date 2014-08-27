@@ -32,6 +32,7 @@ public static final String BASE_URI = "http://localhost:8080/myapp/";
     }
   
     public void init() {
+	System.setProperty("sun.net.http.allowRestrictedHeaders","true");
   	ClientConfig clientConfig = new ClientConfig();
   	//clientConfig.connectorProvider((new HttpUrlConnectorProvider()));
   	//clientConfig.connectorProvider(new GrizzlyConnectorProvider());
