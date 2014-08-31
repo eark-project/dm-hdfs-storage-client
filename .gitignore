@@ -4,12 +4,13 @@ target/
 # IDEA
 .idea/
 *.iml
+workbench.xmi
 
 # Eclipse
 .classpath
 .project
 .settings/
-workbench.xmi
+.checkstyle
 
 # Mac OS X
 .DS_Store
