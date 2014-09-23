@@ -21,6 +21,7 @@ import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.ClientResponse;
 import org.glassfish.jersey.client.HttpUrlConnectorProvider;
 import org.glassfish.jersey.grizzly.connector.GrizzlyConnectorProvider;
+import org.glassfish.jersey.media.multipart.MultiPartFeature;
 
 public class RestClient {
 
@@ -40,6 +41,7 @@ public class RestClient {
     // clientConfig.connectorProvider((new HttpUrlConnectorProvider()));
     // clientConfig.connectorProvider(new GrizzlyConnectorProvider());
     client = ClientBuilder.newClient(clientConfig);
+    //client.register(MultiPartFeature.class);
     client.property(ClientProperties.REQUEST_ENTITY_PROCESSING, "CHUNKED");
     // --client.property(ClientProperties.CHUNKED_ENCODING_SIZE, 10240);
   }
@@ -75,10 +77,12 @@ public class RestClient {
     target = target.path(resourcePath).path("files").path(inFile.getName());
     OutputStream fileOutputStream = new FileOutputStream(new File("dwn."
         + inFile.getName()));
-    ClientResponse response = target.request().get(ClientResponse.class);
-    InputStream fileInputStream = response.getEntityStream();
+    //--ClientResponse response = target.request().get(ClientResponse.class);
+    //--System.out.println("response status: "+response.getStatus());
+    //--InputStream fileInputStream = response.getEntityStream();
+    InputStream fileInputStream = target.request().get(InputStream.class);
     Util.writeFile(fileInputStream, fileOutputStream);
-    return response.toString();
+    return "ok";//response.toString();
   }
 
   /**
