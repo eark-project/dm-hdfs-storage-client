@@ -21,3 +21,6 @@ workbench.xmi
 
 # Logger
 *.log
+
+# Application
+dwn.*

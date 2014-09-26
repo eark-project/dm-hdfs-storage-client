@@ -1,4 +1,4 @@
-package org.eark.hdfs;
+package org.eu.eark.hdfs;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -23,6 +23,9 @@ import org.glassfish.jersey.client.HttpUrlConnectorProvider;
 import org.glassfish.jersey.grizzly.connector.GrizzlyConnectorProvider;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 
+/*
+ * A simple command-line client for the eark jersey-service
+ */
 public class RestClient {
 
   public static final String BASE_URI = "http://localhost:8080/myapp/";
