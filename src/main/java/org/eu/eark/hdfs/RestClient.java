@@ -28,7 +28,7 @@ import org.glassfish.jersey.media.multipart.MultiPartFeature;
  */
 public class RestClient {
 
-  public static final String BASE_URI = "http://localhost:8080/myapp/";
+  public static final String BASE_URI = "http://localhost:8081/myapp/";
 
   private Client client;
   private WebTarget target;
