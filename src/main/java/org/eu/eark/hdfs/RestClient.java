@@ -34,7 +34,6 @@ public class RestClient {
   private WebTarget target;
 
   public RestClient() {
-    super();
   }
 
   public void init() {
@@ -76,7 +75,7 @@ public class RestClient {
   public String getFileReq(String resourcePath, File inFile) throws IOException {
 
     target = client.target(BASE_URI);
-    // String resp = target.path("myresource").request().get(String.class);
+    // String resp = target.path("fileresource").request().get(String.class);
     target = target.path(resourcePath).path("files").path(inFile.getName());
     OutputStream fileOutputStream = new FileOutputStream(new File("dwn."
         + inFile.getName()));
@@ -99,7 +98,7 @@ public class RestClient {
     if (args == null || args.length != 1 || !(new File(args[0])).exists())
       usage();
 
-    String resourcePath = "myresource";
+    String resourcePath = "fileresource";
     RestClient restClient = new RestClient();
     restClient.init();
 
@@ -119,7 +118,7 @@ public class RestClient {
     try {
       responseMsg = restClient.getFileReq(resourcePath, inFile);
     } catch (FileNotFoundException ex) {
-      System.out.println(ex.toString());
+      ex.printStackTrace();
     }
     System.out.println("Request to /" + resourcePath + " returned: "
         + responseMsg);
