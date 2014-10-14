@@ -28,7 +28,7 @@ import org.glassfish.jersey.media.multipart.MultiPartFeature;
  */
 public class RestClient {
 
-  public static final String BASE_URI = "http://localhost:8081/myapp/";
+  public static final String BASE_URI = "http://localhost:8081/hsink/";
 
   private Client client;
   private WebTarget target;
@@ -56,7 +56,7 @@ public class RestClient {
       throws FileNotFoundException {
 
     target = client.target(BASE_URI);
-    target = target.path(resourcePath).path("upload").path(inFile.getName());
+    target = target.path(resourcePath).path("files").path(inFile.getName());
     InputStream fileInStream = new FileInputStream(inFile);
     String contentDisposition = "attachment; filename=\"" + inFile.getName()
         + "\"";
