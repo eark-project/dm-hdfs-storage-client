@@ -7,6 +7,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -52,7 +57,7 @@ public class RestClient {
     return target.path(resourcePath).request().get(String.class);
   }
 
-  public String putFileReq(String resourcePath, File inFile)
+  public Response putFileReq(String resourcePath, File inFile)
       throws FileNotFoundException {
 
     target = client.target(BASE_URI);
@@ -69,22 +74,24 @@ public class RestClient {
     System.out.println("Response status: " + response.getStatus());
     System.out.println("Response: " + response.getLocation());
     // return response.readEntity(String.class);
-    return response.toString();
+    return response;
   }
 
-  public String getFileReq(String resourcePath, File inFile) throws IOException {
+  public String getFileReq(String resourcePath, Path filePath) throws IOException {
 
+    
     target = client.target(BASE_URI);
-    // String resp = target.path("fileresource").request().get(String.class);
-    target = target.path(resourcePath).path("files").path(inFile.getName());
-    OutputStream fileOutputStream = new FileOutputStream(new File("dwn."
-        + inFile.getName()));
+    target = target.path(resourcePath).path("files").path(filePath.toString());
+    System.out.println("about to GET: "+target.toString());
+    File outFile = new File("dwn." + filePath.getFileName().toString());
+    OutputStream fileOutputStream = new FileOutputStream(outFile);
     //--ClientResponse response = target.request().get(ClientResponse.class);
     //--System.out.println("response status: "+response.getStatus());
     //--InputStream fileInputStream = response.getEntityStream();
+    //return response.toString();
     InputStream fileInputStream = target.request().get(InputStream.class);
-    Util.writeFile(fileInputStream, fileOutputStream);
-    return "ok";//response.toString();
+    Util.writeFile(fileInputStream, fileOutputStream);    
+    return outFile.getAbsolutePath();
   }
 
   /**
@@ -92,8 +99,9 @@ public class RestClient {
    * 
    * @param args
    * @throws IOException
+   * @throws URISyntaxException 
    */
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws IOException, URISyntaxException {
 
     if (args == null || args.length != 1 || !(new File(args[0])).exists())
       usage();
@@ -103,25 +111,32 @@ public class RestClient {
     restClient.init();
 
     File inFile = new File(args[0]);
-    String responseMsg = "null";
-
+    Response response = null;
     try {
-      responseMsg = restClient.putFileReq(resourcePath, inFile);
+      response = restClient.putFileReq(resourcePath, inFile);
     } catch (FileNotFoundException ex) {
       System.out.println(ex.toString());
     }
 
     // String responseMsg = restClient.sendReq(resourcePath);
     System.out.println("Request to /" + resourcePath + " returned: "
-        + responseMsg);
-
+        + response);
+    
+    URI responseURI = response.getLocation();
+    Path path = Paths.get(responseURI.getPath());
+    
+    String reqFileName = path.getFileName().toString();
+    String reqDirName = path.getParent().getFileName().toString();
+    Path filePath = Paths.get(reqDirName,reqFileName);
+    
+    String resultFile = null;
     try {
-      responseMsg = restClient.getFileReq(resourcePath, inFile);
+      resultFile = restClient.getFileReq(resourcePath, filePath);
     } catch (FileNotFoundException ex) {
       ex.printStackTrace();
     }
     System.out.println("Request to /" + resourcePath + " returned: "
-        + responseMsg);
+        + resultFile);
 
   }
 
