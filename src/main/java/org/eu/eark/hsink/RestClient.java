@@ -33,7 +33,7 @@ import org.glassfish.jersey.media.multipart.MultiPartFeature;
  */
 public class RestClient {
 
-  public static final String BASE_URI = "http://localhost:8081/hsink/";
+  public static String BASE_URI = "http://localhost:8081/hsink/";
 
   private Client client;
   private WebTarget target;
@@ -103,14 +103,16 @@ public class RestClient {
    */
   public static void main(String[] args) throws IOException, URISyntaxException {
 
-    if (args == null || args.length != 1 || !(new File(args[0])).exists())
+    if (args == null || args.length < 1 || args.length > 2 || !(new File(args[0])).exists())
       usage();
 
     String resourcePath = "fileresource";
     RestClient restClient = new RestClient();
     restClient.init();
+    
+    File inFile = new File(args[0]); 
+    if (args.length == 2) BASE_URI = args[1];
 
-    File inFile = new File(args[0]);
     Response response = null;
     try {
       response = restClient.putFileReq(resourcePath, inFile);
