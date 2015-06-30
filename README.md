@@ -1,7 +1,7 @@
 #HSink Client - A Java-based REST client for transfering large files 
 
 ##About
-HSink Client (dm-hdfs-storage-client) is a Java-based client for HSink [dm-hdfs-storage](https://github.com/eark-project/dm-hdfs-storage), an Jersey based RESTful Web service for transfering large files over HTTP. HSink makes use of chunked transfer encoding allowing a client to transmit large files using HTTP. HSink Client is a Java based alternative to using amn HTTP/1.1 compliant HTTP client like *curl*.
+HSink Client (dm-hdfs-storage-client) is a Java-based client for HSink [dm-hdfs-storage](https://github.com/eark-project/dm-hdfs-storage), an Jersey based RESTful Web service for transferring large files over HTTP. HSink makes use of chunked transfer encoding allowing a client to transmit large files using HTTP. HSink Client is a Java based alternative to using an HTTP/1.1 compliant HTTP client like *curl*.
 
 ##Building the application
 The application depends on the Maven projects [global-configuration](https://github.com/eark-project/global-configuration) and [dm-parent](https://github.com/eark-project/dm-parent). Both projects must be downloaded, built, and installed before HSink can be compiled.
