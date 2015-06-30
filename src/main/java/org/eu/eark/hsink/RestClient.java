@@ -33,7 +33,8 @@ import org.glassfish.jersey.media.multipart.MultiPartFeature;
  */
 public class RestClient {
 
-  public static String BASE_URI = "http://localhost:8081/hsink/";
+  public final static String BASE_URI = "http://localhost:8081/hsink/";
+  public final static String FILE_RESOURCE = "fileresource";
 
   private Client client;
   private WebTarget target;
@@ -69,6 +70,7 @@ public class RestClient {
         .request(MediaType.APPLICATION_OCTET_STREAM_TYPE);
     invocationBuilder.header("Content-Disposition", contentDisposition);
     invocationBuilder.header("Content-Length", (int) inFile.length());
+    System.out.println("sending: "+inFile.length()+" bytes...");
     Response response = invocationBuilder.put(Entity.entity(fileInStream,
         MediaType.APPLICATION_OCTET_STREAM_TYPE));
     System.out.println("Response status: " + response.getStatus());
@@ -77,13 +79,12 @@ public class RestClient {
     return response;
   }
 
-  public String getFileReq(String resourcePath, Path filePath) throws IOException {
+  public String getFileReq(String resourcePath, Path filePath, File outFile) throws IOException {
 
     
     target = client.target(BASE_URI);
     target = target.path(resourcePath).path("files").path(filePath.toString());
-    System.out.println("about to GET: "+target.toString());
-    File outFile = new File("dwn." + filePath.getFileName().toString());
+    System.out.println("Target for GET request: "+target.toString());
     OutputStream fileOutputStream = new FileOutputStream(outFile);
     //--ClientResponse response = target.request().get(ClientResponse.class);
     //--System.out.println("response status: "+response.getStatus());
@@ -103,49 +104,63 @@ public class RestClient {
    */
   public static void main(String[] args) throws IOException, URISyntaxException {
 
-    if (args == null || args.length < 1 || args.length > 2 || !(new File(args[0])).exists())
+    if (args == null || args.length < 2 || args.length > 3)
       usage();
+    
+    File inFile = null;
+    String baseURI = BASE_URI;
 
-    String resourcePath = "fileresource";
+    String resourcePath = FILE_RESOURCE;
     RestClient restClient = new RestClient();
     restClient.init();
-    
-    File inFile = new File(args[0]); 
-    if (args.length == 2) BASE_URI = args[1];
-
     Response response = null;
-    try {
-      response = restClient.putFileReq(resourcePath, inFile);
-    } catch (FileNotFoundException ex) {
-      System.out.println(ex.toString());
+    URI downloadURI = null;
+    File outFile = null;
+    
+    if(args[0].toLowerCase().equals("-u") || args[0].toLowerCase().equals("-t")) {
+    	inFile = new File(args[1]);
+    	if(!inFile.exists()) usage();
+    	if(args.length > 2) baseURI = args[2];
+        try {
+            response = restClient.putFileReq(resourcePath, inFile);
+          } catch (FileNotFoundException ex) {
+            System.out.println(ex.toString());
+          }    		    	
+        System.out.println("Request to /" + resourcePath + " returned: " + response);
     }
+    
+    if(args[0].toLowerCase().equals("-d") || args[0].toLowerCase().equals("-t")) {
+    	//-t roundtrip
+    	if(response != null) downloadURI = response.getLocation();
+    	else downloadURI = new URI(args[1]);
 
-    // String responseMsg = restClient.sendReq(resourcePath);
-    System.out.println("Request to /" + resourcePath + " returned: "
-        + response);
-    
-    URI responseURI = response.getLocation();
-    Path path = Paths.get(responseURI.getPath());
-    
-    String reqFileName = path.getFileName().toString();
-    String reqDirName = path.getParent().getFileName().toString();
-    Path filePath = Paths.get(reqDirName,reqFileName);
-    
-    String resultFile = null;
-    try {
-      resultFile = restClient.getFileReq(resourcePath, filePath);
-    } catch (FileNotFoundException ex) {
-      ex.printStackTrace();
+    	Path path = Paths.get(downloadURI.getPath());
+    	String reqFileName = path.getFileName().toString();
+        String reqDirName = path.getParent().getFileName().toString();
+        Path filePath = Paths.get(reqDirName,reqFileName);
+        
+        if(response == null && args.length > 2) outFile = new File(args[2]);
+        else outFile = new File("dwn." + filePath.getFileName().toString());
+        System.out.println("outFile: "+outFile);
+        
+        try {
+          System.out.println("Requesting: "+resourcePath+"/"+filePath);
+          String resultFile = restClient.getFileReq(resourcePath, filePath, outFile);
+          System.out.println("Output written to: " + resultFile);
+        } catch (FileNotFoundException ex) {
+          ex.printStackTrace();
+        }
     }
-    System.out.println("Request to /" + resourcePath + " returned: "
-        + resultFile);
-
   }
 
   public static void usage() {
     System.out
-        .println("client application to upload large files to the eArk HDFS storage service");
-    System.out.println("usage: java -jar JARFILE path_to_file");
+        .println("client application to upload amd download (large) files from/to HSink storage service");
+    System.out.println("usage: java -jar JARFILE [options] [source URI] [target URI]");
+    System.out.println("...file upload:   java -jar client.jar -u ./file [http://localhost:8081/hsink]");
+    System.out.println("...file download: java -jar client.jar -d http://localhost:8081/hsink/.../file ./file");
+    System.out.println("...roundtrip test: java -jar client.jar -t ./file [http://localhost:8081/hsink]");
+    
     System.exit(-1);
   }
 
